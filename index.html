@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Feed The World</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href='https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/paper/bootstrap.min.css' rel='stylesheet' type='text/css'>
+  <link href='css/main.css' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+  <section>
+    <button onclick="window.save()">Save</button><button onclick="window.load()">Load</button><button onclick="window.clearsave()">clear</button>
+  </section>
+  <section>
+    <div class="container">
+      <div id="nations">
+        <div rv-each-nation="nations" class='container'>
+          <span>Day: { nation.day }</span>&emsp;
+          <span>Year: { nation.year }</span>&emsp;
+          <span>Population: { nation.population | int}</span>&emsp;
+          <span>Workers: { nation.workers | int}</span>&emsp;
+          <span>Free: { nation.free | int}</span>&emsp;
+          <span>Births: { nation.births.value | int}</span>&emsp;
+          <span>Deaths: { nation.deaths.value | int}</span> &emsp;
+          <span>Research: { nation.research.value | int}</span> &emsp;
+          <span>Research Rate: { nation.research.rate | round 3} research points per person per day</span> &emsp;
+          <span>Land: { nation.land.value | round 2} km<sup>2</sup></span> &emsp;
+          <span>Water: { nation.water.value | round 2} km<sup>2</sup></span> &emsp;
+          <div class="row">
+            <div class="col-md-4">
+              <button rv-disabled="nation.exploring" rv-on-click="nation.explore">Explore</button>
+              <div rv-if="nation.exploring">
+                <progress rv-value="nation.exploretimer" rv-max="nation.exploretimermax"></progress><span>{nation.exploretimer | / nation.exploretimermax | * 100 | round }%</span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div rv-each-industry="nation.industries" class=''>
+              <div rv-unless="industry.unlocked">
+                <span>Unlock { industry.name }</span>
+                <button rv-on-click="industry.unlock" rv-class-training="industry.training" rv-enabled="industry.unlockcost | lte nation.research.value">{ industry.unlockcost | int } Research</button>
+              </div>
+            </div>
+          </div>
+          <section rv-each-industry="nation.industries">
+            <div rv-if="industry.unlocked" class="row">
+              <div class='col-md-4'>
+                <h4>{ industry.name }</h4>
+                <span>{ industry.description }</span>
+                  <div rv-if="industry.trained | lt nation.population">
+                    <button rv-on-click="industry.trainworker" rv-enabled="industry.cost.value | lte nation.research.value">Train 1 worker for { industry.cost.value | int } R</button>
+                  </div>
+                  <div rv-if="industry.trained | + 10 | lte nation.population">
+                    <button rv-on-click="industry.trainworker" data-on-click="10" rv-enabled="industry.cost.value | * 10 | lte nation.research.value">Train 10 workers for { industry.cost.value | * 10 | int } R</button>
+                  </div>
+                <div rv-if="industry.training">
+                  <progress rv-value="industry.trainingcount" rv-max="industry.trainingcountmax"></progress><span>{industry.trainingcount | / industry.trainingcountmax | * 100 | round }%</span>
+                </div>
+                <div rv-if="industry.autotrain.unlocked">
+                  <label>Autotraining: <input type="checkbox" rv-checked="industry.autotrain.on"></label>
+                  <progress rv-if="industry.autotrain.on" rv-value="industry.autotrain.value" rv-max="industry.trainingtime"></progress>
+                </div>
+                <span>Training: {industry.training}</span>
+              </div>
+              <div class='col-md-4'>
+                <span>People Fed: { industry.food.rate | * industry.workers |  round 2}</span><br>
+                <span>Food Per Worker: { industry.food.rate | round 2}</span><br>
+                <span><meter rv-value="industry.workers" min="0" rv-max="nation.population">{industry.workers} out of {nation.population}</meter></span><br>
+                <span>workers: { industry.workers }</span><br>
+                <span>trained workers: { industry.trained }</span><br>
+                <span>workers capacity: { industry.maxworkers }</span><br>
+                <span>land use: { industry.landuse.rate | * industry.workers | round 2} km<sup>2</sup> ({industry.landuse.rate | * industry.workers | / nation.land.value | * 100 | round 2}% )</span><br>
+                <span rv-if="industry.wateruse.rate | * industry.workers | > 1">water use: { industry.wateruse.rate | * industry.workers | round 2} km<sup>2</sup> ({industry.wateruse.rate | * industry.workers | / nation.water.value | * 100 | round 2}% )</span><br>
+                <span>limiting factor: { industry.limiter }</span><br>
+              </div>
+              <div rv-each-upgrade="nation.upgrades" class='col-md-4'>
+                <div rv-if="upgrade.industry | like industry.name">
+                  <button rv-on-click="upgrade.buy" rv-if="upgrade.unlocked" rv-enabled="upgrade.cost.value | lte nation.research.value | and upgrade.buyable" rv-class-bought="upgrade.count | gte upgrade.max">
+                                                { upgrade.name } <span rv-if='upgrade.count | gt 1'>{ upgrade.count }</span> : { upgrade.cost.value | int } R <span rv-if="upgrade.cost.multiplier | gt 1">( {upgrade.cost.multiplier | * 100 | round 2}%) </span>
+                                            </button>
+                  <div class='toolcontainer'>
+                    <div class='tooltip'>
+                      <span>{ upgrade.description }</span><br>
+                      <span>{ upgrade.effects }</span><br>
+                      <span>Cost: { upgrade.cost.value | int }</span><br>
+                      <span rv-if="upgrade.count | gte 1">Bought { upgrade.count } of {upgrade.max}</span><br>
+                      <span>buyable?: { upgrade.buyable }</span><br>
+                      <span>unlocked?: { upgrade.unlocked }</span><br>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </section>
+          <section>
+            <h2>Other</h2>
+            <div rv-each-upgrade="nation.upgrades" class='two columns'>
+              <div rv-if="upgrade.industry | isEmpty">
+                <div rv-if="upgrade.unlocked">
+                  <h4>{ upgrade.name }</h4>
+                  <button rv-on-click="upgrade.buy" rv-enabled="upgrade.cost.value | lte nation.research.value | and upgrade.buyable">Buy for { upgrade.cost.value | int }</button><br>
+                  <span>{ upgrade.description }</span><br><br>
+                  <span>Effects: { upgrade.effects }</span><br>
+                  <span>Cost: { upgrade.cost.value | int }</span><br>
+                  <span>Count: { upgrade.count }</span><br>
+                </div>
+              </div>
+          </section>
+          </div>
+  </section>
+  </div>
+  </div>
+  </section>
+  <footer>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="vendor/scripts/rivets.bundled.min.js"></script>
+    <script src="vendor/scripts/store.min.js"></script>
+    <script src="vendor/scripts/watch.min.js"></script>
+    <script src="js/rivetsoptions.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/industries.js"></script>
+    <script src="js/upgrades.js"></script>
+    <script src="js/init.js"></script>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+html, body, {
+	height: 100%;
+	width: 100%;
+}
+
+section {
+	width: 100%;
+	max-width: 1280px;
+	margin: 0 auto;
+	clear:both;
+}
+
+section + section {
+	border-top: 2px solid black;
+	padding-top: 10px;
+	margin-top: 10px;
+}
+
+li {
+	list-style-type: none;
+	display: inline-block;
+}
+
+.clear {width: 100%; min-height: 10px; display: block; clear:both;}
+
+button {
+    height: auto;
+    position: relative;
+}
+
+button:disabled {
+	opacity: 0.5;
+}
+
+.hover {
+    position:relative;
+    top:50px;
+    left:50px;
+}
+
+.toolcontainer {
+    height: 10px;
+    overflow: visible;
+    position: relative;
+}
+
+.tooltip { /* hide and position tooltip */
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  border-radius:5px;
+  padding: 10px;
+  opacity:0;
+  height: 0;
+  max-width: 300px;
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -ms-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+	z-index: -1;
+}
+
+button:hover~.toolcontainer > .tooltip { /* display tooltip on hovering over button */
+    opacity:1;
+    height: auto;
+	  z-index: 100;
+}
