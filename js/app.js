@@ -454,13 +454,13 @@ var industry_model = function industry_model(attributes) {
       } else {
         this.trainingcomplete();
       }
-    } else if (this.autotrain.unlocked && this.autotrain.on && this.trained <= this.parentobject.population) {
-      // the autotrain counter goes 
+    } 
+		if (this.autotrain.unlocked && this.autotrain.on && this.trained < this.parentobject.population) {
       // increment the training counter if its less than the training time, otherwise just train a worker.
         if (this.autotrain.value <= this.trainingtime) {
           this.autotrain.value += this.autotrain.rate;
         } else {
-          this.trainworker(this.autotrain.amount);
+          this.trained += Math.round(this.autotrain.amount);
           this.autotrain.value = 0;
         }
       }

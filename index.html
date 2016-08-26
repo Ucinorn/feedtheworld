@@ -48,12 +48,14 @@
               <div class='col-md-4'>
                 <h4>{ industry.name }</h4>
                 <span>{ industry.description }</span>
+								<div rv-unless="industry.training">
                   <div rv-if="industry.trained | lt nation.population">
                     <button rv-on-click="industry.trainworker" rv-enabled="industry.cost.value | lte nation.research.value">Train 1 worker for { industry.cost.value | int } R</button>
                   </div>
                   <div rv-if="industry.trained | + 10 | lte nation.population">
                     <button rv-on-click="industry.trainworker" data-on-click="10" rv-enabled="industry.cost.value | * 10 | lte nation.research.value">Train 10 workers for { industry.cost.value | * 10 | int } R</button>
                   </div>
+                </div>
                 <div rv-if="industry.training">
                   <progress rv-value="industry.trainingcount" rv-max="industry.trainingcountmax"></progress><span>{industry.trainingcount | / industry.trainingcountmax | * 100 | round }%</span>
                 </div>
@@ -61,7 +63,6 @@
                   <label>Autotraining: <input type="checkbox" rv-checked="industry.autotrain.on"></label>
                   <progress rv-if="industry.autotrain.on" rv-value="industry.autotrain.value" rv-max="industry.trainingtime"></progress>
                 </div>
-                <span>Training: {industry.training}</span>
               </div>
               <div class='col-md-4'>
                 <span>People Fed: { industry.food.rate | * industry.workers |  round 2}</span><br>
