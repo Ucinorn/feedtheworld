@@ -21,22 +21,23 @@
           <span>Population: { nation.population | int}</span>&emsp;
           <span>Workers: { nation.workers | int}</span>&emsp;
           <span>Free: { nation.free | int}</span>&emsp;
-          <span>Births: { nation.births.value | int}</span>&emsp;
-          <span>Deaths: { nation.deaths.value | int}</span> &emsp;
+          <span>Births: { nation.births.value | int}  ( X {nation.births.multiplier | round 2} )</span>&emsp;
+          <span>Deaths: { nation.deaths.value | int}  ( X {nation.deaths.multiplier | round 2} )</span> &emsp;
           <span>Research: { nation.research.value | int}</span> &emsp;
           <span>Research Rate: { nation.research.rate | round 3} research points per person per day</span> &emsp;
           <span>Land: { nation.land.value | round 2} km<sup>2</sup></span> &emsp;
           <span>Water: { nation.water.value | round 2} km<sup>2</sup></span> &emsp;
+          <span>Total Food produced: { nation.food} ( {nation.food | / nation.population | * 100 | round }%)</span> &emsp;
           <div class="row">
             <div class="col-md-4">
-              <button rv-disabled="nation.exploring" rv-on-click="nation.explore">Explore</button>
+              <button rv-disabled="nation.free | lte 10 | or nation.exploring" rv-on-click="nation.explore">Explore</button>
               <div rv-if="nation.exploring">
                 <progress rv-value="nation.exploretimer" rv-max="nation.exploretimermax"></progress><span>{nation.exploretimer | / nation.exploretimermax | * 100 | round }%</span>
               </div>
             </div>
           </div>
           <div class="row">
-            <div rv-each-industry="nation.industries" class=''>
+            <div rv-each-industry="nation.industries" class='col-md-4'>
               <div rv-unless="industry.unlocked">
                 <span>Unlock { industry.name }</span>
                 <button rv-on-click="industry.unlock" rv-class-training="industry.training" rv-enabled="industry.unlockcost | lte nation.research.value">{ industry.unlockcost | int } Research</button>
@@ -48,14 +49,12 @@
               <div class='col-md-4'>
                 <h4>{ industry.name }</h4>
                 <span>{ industry.description }</span>
-								<div rv-unless="industry.training">
                   <div rv-if="industry.trained | lt nation.population">
-                    <button rv-on-click="industry.trainworker" rv-enabled="industry.cost.value | lte nation.research.value">Train 1 worker for { industry.cost.value | int } R</button>
+                    <button rv-unless="industry.training" rv-on-click="industry.trainworker" rv-enabled="industry.cost.value | lt nation.research.value">1 worker for { industry.cost.value | int } R</button>
                   </div>
                   <div rv-if="industry.trained | + 10 | lte nation.population">
-                    <button rv-on-click="industry.trainworker" data-on-click="10" rv-enabled="industry.cost.value | * 10 | lte nation.research.value">Train 10 workers for { industry.cost.value | * 10 | int } R</button>
+                    <button rv-unless="industry.training" rv-on-click="industry.trainworker" data-on-click="10" rv-enabled="industry.cost.value | * 10 | lt nation.research.value">10 workers for { industry.cost.value | * 10 | int } R</button>
                   </div>
-                </div>
                 <div rv-if="industry.training">
                   <progress rv-value="industry.trainingcount" rv-max="industry.trainingcountmax"></progress><span>{industry.trainingcount | / industry.trainingcountmax | * 100 | round }%</span>
                 </div>
@@ -68,11 +67,11 @@
                 <span>People Fed: { industry.food.rate | * industry.workers |  round 2}</span><br>
                 <span>Food Per Worker: { industry.food.rate | round 2}</span><br>
                 <span><meter rv-value="industry.workers" min="0" rv-max="nation.population">{industry.workers} out of {nation.population}</meter></span><br>
-                <span>workers: { industry.workers }</span><br>
+                <span>workers: { industry.workers } / { industry.maxworkers }</span><br>
                 <span>trained workers: { industry.trained }</span><br>
-                <span>workers capacity: { industry.maxworkers }</span><br>
                 <span>land use: { industry.landuse.rate | * industry.workers | round 2} km<sup>2</sup> ({industry.landuse.rate | * industry.workers | / nation.land.value | * 100 | round 2}% )</span><br>
-                <span rv-if="industry.wateruse.rate | * industry.workers | > 1">water use: { industry.wateruse.rate | * industry.workers | round 2} km<sup>2</sup> ({industry.wateruse.rate | * industry.workers | / nation.water.value | * 100 | round 2}% )</span><br>
+								<!--  rv-if="industry.wateruse.rate | * industry.workers | > 1" -->
+                <span>water use: { industry.wateruse.rate | * industry.workers | round 2} km<sup>2</sup> ({industry.wateruse.rate | * industry.workers | / nation.water.value | * 100 | round 2}% )</span><br>
                 <span>limiting factor: { industry.limiter }</span><br>
               </div>
               <div rv-each-upgrade="nation.upgrades" class='col-md-4'>
@@ -109,6 +108,14 @@
                 </div>
               </div>
           </section>
+						<section>
+							<h2>
+								Log
+							</h2>
+						<ul>
+							<li rv-each-string="nation.logstrings">{string}</li>
+							</ul>
+						</section>
           </div>
   </section>
   </div>
@@ -116,7 +123,6 @@
   </section>
   <footer>
 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="vendor/scripts/rivets.bundled.min.js"></script>
     <script src="vendor/scripts/store.min.js"></script>
     <script src="vendor/scripts/watch.min.js"></script>
@@ -125,6 +131,8 @@
     <script src="js/industries.js"></script>
     <script src="js/upgrades.js"></script>
     <script src="js/init.js"></script>
+		<script src="https://code.jquery.com/jquery-3.1.0.slim.min.js" integrity="sha256-cRpWjoSOw5KcyIOaZNo4i6fZ9tKPhYYb6i5T9RSVJG8=" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </footer>
 </body>
 
